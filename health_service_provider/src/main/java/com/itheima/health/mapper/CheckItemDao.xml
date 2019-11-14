@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.health.dao.CheckItemDao">
+    <insert id="insert" parameterType="CheckItem">
+        insert into t_checkitem(id, code, name, sex, age, price, type, attention, remark)
+        values (#{id}, #{code}, #{name}, #{sex}, #{age}, #{price}, #{type}, #{attention}, #{remark})
+    </insert>
+    <update id="update" parameterType="CheckItem">
+        update t_checkitem
+        set code = #{code},
+            name = #{name},
+            sex = #{sex},
+            age = #{age},
+            price = #{price},
+            type = #{type},
+            attention = #{attention},
+            remark =#{remark}
+        where id = #{id}
+    </update>
+    <delete id="deleteById" parameterType="integer">
+        delete
+        from t_checkitem
+        where id = #{id}
+    </delete>
+    <select id="selectByConditon" resultType="com.itheima.health.pojo.CheckItem" parameterType="string">
+        select * from t_checkitem
+        <if test="queryString != null and queryString.length > 0">
+            where code like concat('%',#{queryString},'%') or name like concat('%',#{queryString},'%')
+        </if>
+    </select>
+    <select id="countCheckGroupByCheckItemId" resultType="java.lang.Long" parameterType="integer">
+        select count(1)
+        from t_checkgroup_checkitem
+        where checkitem_id = #{checkItemId};
+    </select>
+    <select id="selectById" resultType="com.itheima.health.pojo.CheckItem" parameterType="integer">
+        select  * from t_checkitem where id=#{id}
+    </select>
+    <select id="selectAll" resultType="com.itheima.health.pojo.CheckItem">
+        select * from t_checkitem
+    </select>
+    <select id="selectByCheckGroupId" resultType="CheckItem">
+        select * from t_checkitem where id in (select checkitem_id from t_checkgroup_checkitem where checkgroup_id=#{checkgroup_id})
+    </select>
+</mapper>

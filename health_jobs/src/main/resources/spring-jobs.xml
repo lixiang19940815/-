@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--自动扫包,后续注入jedis到任务调度类-->
+    <context:component-scan base-package="com.itheima.health"/>
+    <!--注册一个定义任务对象-->
+    <bean id = "clearImgJob" class="com.itheima.health.jobs.ClearImageJob"/>
+    <!-- 注册JobDetail,作用是负责通过反射调用指定的Job -->
+    <bean id="clearImgJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!--注入对象-->
+        <property name="targetObject" ref="clearImgJob"/>
+        <!--注入方法-->
+        <property name="targetMethod" value="clearImageJob"/>
+    </bean>
+    <!--注册一个触发器，指定任务触发的时间（间隔）-->
+    <bean id="jobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="clearImgJobDetail"/>
+        <property name="cronExpression">
+            <!-- 每隔10秒执行一次任务 0/10 * * * * ? -->
+            <!-- 每隔2分钟执行一次任务  0 0/2 * * * ? -->
+            <!-- 每天凌晨2点执行一次任务 0 0 2 * * ?  -->
+            <value>0 0 2 * * ?</value>
+        </property>
+    </bean>
+    <!--注册一个统一调用工厂，通过这个调度工厂调度任务-->
+    <bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="jobTrigger"/>
+            </list>
+        </property>
+    </bean>
+</beans>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--阿里云配置-->
+    <bean id="defaultProfile" class="com.aliyuncs.profile.DefaultProfile" factory-method="getProfile">
+        <constructor-arg name="regionId" value="cn-hangzhou"/>
+        <constructor-arg name="accessKeyId" value="${aliyun.accesskey.id}"/>
+        <constructor-arg name="secret" value="${aliyun.accesskey.secret}"/>
+    </bean>
+    <bean class="com.aliyuncs.DefaultAcsClient">
+        <constructor-arg name="profile" ref="defaultProfile"/>
+    </bean>
+
+</beans>

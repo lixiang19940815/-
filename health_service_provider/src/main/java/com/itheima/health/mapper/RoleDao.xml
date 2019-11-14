@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.health.dao.RoleDao">
+    <select id="selectByUserId" resultType="com.itheima.health.pojo.Role">
+        SELECT tr.* from t_role tr join t_user_role tur on tr.id = tur.role_id
+        where tur.user_id=#{userId}
+    </select>
+</mapper>
