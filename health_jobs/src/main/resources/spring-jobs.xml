@@ -16,7 +16,7 @@
         <property name="targetMethod" value="clearImageJob"/>
     </bean>
     <!--注册一个触发器，指定任务触发的时间（间隔）-->
-    <bean id="jobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+    <bean id="jobTriggerOne" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="clearImgJobDetail"/>
         <property name="cronExpression">
             <!-- 每隔10秒执行一次任务 0/10 * * * * ? -->
@@ -25,11 +25,35 @@
             <value>0 0 2 * * ?</value>
         </property>
     </bean>
+
+<!--清理ordersetting-->
+
+
+    <bean id = "OrderSetting" class="com.itheima.health.jobs.ClearOrderSetting"/>
+    <!-- 注册JobDetail,作用是负责通过反射调用指定的Job -->
+    <bean id="clear" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!--注入对象-->
+        <property name="targetObject" ref="OrderSetting"/>
+        <!--注入方法-->
+        <property name="targetMethod" value="clearOrdersetting"/>
+    </bean>
+    <!--注册一个触发器，指定任务触发的时间（间隔）-->
+    <bean id="jobTriggerTwo" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="clear"/>
+        <property name="cronExpression">
+            <!-- 每隔10秒执行一次任务 0/10 * * * * ? -->
+            <!-- 每隔2分钟执行一次任务  0 0/2 * * * ? -->
+            <!-- 每天凌晨2点执行一次任务 0 0 2 * * ?  -->
+            <value>0/10 * * * * ?</value>
+            <!--<value>0 0 2 L * ?</value>-->
+        </property>
+    </bean>
     <!--注册一个统一调用工厂，通过这个调度工厂调度任务-->
     <bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
-                <ref bean="jobTrigger"/>
+                <ref bean="jobTriggerOne"/>
+                <ref bean="jobTriggerTwo"/>
             </list>
         </property>
     </bean>
