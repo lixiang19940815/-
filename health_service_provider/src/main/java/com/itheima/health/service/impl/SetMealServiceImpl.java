@@ -44,9 +44,13 @@ public class SetMealServiceImpl implements SetMealService {
         // 调用DAO数据入库
         // 插入基本数据
         setmealDao.insert(setmeal);
+        //创建集合，
         List<Setmeal> setmealList = new ArrayList<>();
+        //查询数据库
         List<Setmeal> setmeals = setmealDao.selectAll();
+        //查询数据库后
         for (Setmeal setmeal1 : setmeals) {
+
             Setmeal setmeal2 = setmealDao.selectById(setmeal.getId());
             setmealList.add(setmeal1);
         }
@@ -55,7 +59,7 @@ public class SetMealServiceImpl implements SetMealService {
             setmealDao.insertSetMealAndCheckGroup(setmeal.getId(), checkgroupId);
         }
         ObjectMapper objectMapper = new ObjectMapper();
-
+        //存入缓存
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.sadd(RedisConst.SETMEAL_PIC_DB_RESOURCES, setmeal.getImg());
             jedis.del(RedisConst.SETMEAL_DB_RESOURCES);
@@ -83,28 +87,34 @@ public class SetMealServiceImpl implements SetMealService {
     @Override
     public List<Setmeal> findAll() {
         try (Jedis jedis = jedisPool.getResource()) {
-            //数据库
+            //创建jackson
             ObjectMapper objectMapper = new ObjectMapper();
-            ArrayList<Setmeal> setmealList2 = new ArrayList<>();
+            //创建Arraylist集合，
+            ArrayList<Setmeal> setmealList = new ArrayList<>();
+            //判断，首先去缓存中查看，看看缓存有没有要的数据
             if (jedis.lrange(RedisConst.SETMEAL_DB_RESOURCES,0,-1).size() == 0) {
-                List<Setmeal> setmealList = setmealDao.selectAll();
-                for (Setmeal setmeal : setmealList) {
-                    Setmeal setmeal1 = setmealDao.selectById(setmeal.getId());
-                    setmealList2.add(setmeal1);
+                //没有，调DAO层，查询数据库
+                List<Setmeal> setmealLists = setmealDao.selectAll();
+                //循环遍历存入list集合中
+                for (Setmeal setmeals : setmealLists) {
+                    Setmeal setmeal1 = setmealDao.selectById(setmeals.getId());
+                    setmealList.add(setmeal1);
                 }
-                //序列化
-                for (Setmeal setmeal : setmealList2) {
-                    String setmealCache = objectMapper.writeValueAsString(setmeal);
+                //json序列化,存入redis中    把对象转换为字节序列的过程称为对象的序列化。
+                for (Setmeal setmeals : setmealList) {
+                    String setmealCache = objectMapper.writeValueAsString(setmeals);
                     jedis.rpush(RedisConst.SETMEAL_DB_RESOURCES, setmealCache);
                 }
                 return setmealList;
             } else {
-                ArrayList<Setmeal> setmealList = new ArrayList<>();
-                //缓存
+                //创建集合
+                ArrayList<Setmeal> setmeal = new ArrayList<>();
+                //如果缓存中有要的数据，直接查缓存
                 List<String> smembers = jedis.lrange(RedisConst.SETMEAL_DB_RESOURCES,0,-1);
                 for (String smember : smembers) {
-                    Setmeal setmeal = objectMapper.readValue(smember, Setmeal.class);
-                    setmealList.add(setmeal);
+                    //反序列化：把字节序列恢复为对象的过程称为对象的反序列化
+                    Setmeal setmeal2 = objectMapper.readValue(smember, Setmeal.class);
+                    setmealList.add(setmeal2);
                 }
                 return setmealList;
             }
@@ -117,19 +127,26 @@ public class SetMealServiceImpl implements SetMealService {
 
     @Override
     public Setmeal findById(Integer id) {
-        Setmeal setmealResult = null;
+        Setmeal setmealRedis = null;
+        //创建jackson
         ObjectMapper objectMapper = new ObjectMapper();
+        //去缓存查询
         try (Jedis jedis = jedisPool.getResource()) {
+            //查询存入list集合
             List<String> smembers = jedis.lrange(RedisConst.SETMEAL_DB_RESOURCES,0,-1);
+            //循环遍历
             for (String smember : smembers) {
+                //反序列化：把字节序列恢复为对象的过程称为对象的反序列化
                 Setmeal setmeal = objectMapper.readValue(smember, Setmeal.class);
+                //根据id传套餐详情，查到了返回给事先定义的setmealRedis，结束
                 if (id == setmeal.getId()) {
-                    setmealResult = setmeal;
+                    setmealRedis = setmeal;
                     break;
                 }
             }
-            if (setmealResult == null) {
-                setmealResult = setmealDao.selectById(id);
+            //缓存没查到，为null，直接查数据库 ，
+            if (setmealRedis == null) {
+                setmealRedis = setmealDao.selectById(id);
             }
         } catch (JsonParseException e) {
             e.printStackTrace();
@@ -139,7 +156,7 @@ public class SetMealServiceImpl implements SetMealService {
             e.printStackTrace();
         }
         //调用DAO查询数据
-        return setmealResult;
+        return setmealRedis;
     }
 
 
