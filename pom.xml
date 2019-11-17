@@ -52,7 +52,7 @@
         <poi.version>3.14</poi.version>
         <aliyun-java-sdk-core.version>4.1.0</aliyun-java-sdk-core.version>
         <spring-aspects.version>5.0.5.RELEASE</spring-aspects.version>
-        <jackson-databind.version>2.9.9.3</jackson-databind.version>
+        <jackson-databind.version>2.9.10.1</jackson-databind.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -73,7 +73,6 @@
             <dependency>
                 <groupId>javax.servlet.jsp</groupId>
                 <artifactId>jsp-api</artifactId>
-                <version>${jsp-api.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
@@ -92,6 +91,7 @@
                 <artifactId>spring-aspects</artifactId>
                 <version>${spring-aspects.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-jdbc</artifactId>

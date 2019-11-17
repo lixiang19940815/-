@@ -1,73 +1,127 @@
-<!DOCTYPE html>
 <html>
-    <head>
-        <!-- 页面meta -->
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>传智健康</title>
-        <meta name="description" content="传智健康">
-        <meta name="keywords" content="传智健康">
-        <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
-        <!-- 引入样式 -->
-        <link rel="stylesheet" href="../css/style.css">
-        <script src="../plugins/echarts/echarts.js"></script>
-    </head>
-    <body class="hold-transition">
-        <div id="app">
-            <div class="content-header">
-                <h1>统计分析<small>会员数量</small></h1>
-                <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
-                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                    <el-breadcrumb-item>统计分析</el-breadcrumb-item>
-                    <el-breadcrumb-item>会员数量</el-breadcrumb-item>
-                </el-breadcrumb>
-            </div>
-            <div class="app-container">
-                <div class="box">
-                    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-                    <div id="chart1" style="height:600px;"></div>
-                </div>
-            </div>
-        </div>
-    </body>
+<head>
+    <!-- 页面meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>传智健康</title>
+    <meta name="description" content="传智健康">
+    <meta name="keywords" content="传智健康">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/elementui/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/style.css">
     <!-- 引入组件库 -->
     <script src="../js/vue.js"></script>
-    <script src="../js/axios-0.18.0.js"></script>
-    <script type="text/javascript">
-        // 基于准备好的dom，初始化echarts实例
-        var myChart1 = echarts.init(document.getElementById('chart1'));
+    <script src="../plugins/elementui/index.js"></script>
+    <script src="../plugins/echarts/echarts.js"></script>
+</head>
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>统计分析<small>会员数量</small></h1>
+        <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>统计分析</el-breadcrumb-item>
+            <el-breadcrumb-item>会员数量</el-breadcrumb-item>
+        </el-breadcrumb>
+    </div>
+    <div class="app-container">
+        <div class="box">
+            <!--加入日期组件-->
+            <div class="block">
+                <!--<span class="demonstration">默认</span>-->
+                <el-date-picker
+                        v-model="dateRange"
+                        type="daterange"
+                        range-separator="至"
+                        start-placeholder="开始日期"
+                        end-placeholder="结束日期">
+                </el-date-picker>
+                <!--加入查询组件-->
+                <el-button @click="findByMonthRange()" class="dalfBut">查询</el-button>
+            </div>
+            <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+            <div id="chart1" style="height:600px;"></div>
+        </div>
+    </div>
+</div>
+</body>
+<!-- 引入组件库 -->
+<script src="../js/vue.js"></script>
+<script src="../plugins/elementui/index.js"></script>
+<script src="../js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    var vue = new Vue({
+        el:'#app',
+        data:{
+            //日期范围（初始值为一年内的会员数）
+            dateRange:[new Date().setFullYear(new Date().getFullYear(),-1),new Date()],
+            //折线图所需数据
+            memberOption:{
+                title: {
+                    text: '会员数量'
+                },
+                tooltip: {},
+                legend: {
+                    data:['会员数量']
+                },
+                xAxis: {
+                    data: ["2018.01","2018.02","2018.03","2018.04"]
+                },
+                yAxis: {
+                    type:'value'
+                },
+                series: [{
+                    name: '会员数量',
+                    type: 'line',
+                    data: [13,14,28,30]
+                }]
+            },
 
-        // 使用刚指定的配置项和数据显示图表。
-        var memberOption = {
-            title: {
-                text: '会员数量'
+        },
+        //页面加载完成，自动查询往前一年的数据折线图
+        mounted(){
+            this.findByMonthRange();
+        },
+        methods: {
+            //根据日期范围查询数据
+            findByMonthRange() {
+                //初始化ECharts，并解决不能在单个容器上初始化多个 ECharts的问题
+                var chartEle = document.getElementById('chart1');
+                chartEle.removeAttribute("_echarts_instance_");
+                var myChart1 = echarts.init(chartEle);
+                //格式化日期数据转换成字符串
+                this.dateRange[0] = this.formatDate(this.dateRange[0]);
+                this.dateRange[1] = this.formatDate(this.dateRange[1]);
+                //发送请求到后端，获取所需数据
+                axios.get("http://localhost:9002/report/getMemberReport.do?dateRange="+ this.dateRange).then((res) => {
+                    if (res.data.flag) {
+                        //数据展示
+                        this.memberOption.xAxis.data = res.data.data.months;
+                        this.memberOption.series[0].data = res.data.data.memberCount;
+                        //将数据展示到Echarts画布中
+                        myChart1.clear();
+                        myChart1.setOption(this.memberOption,true);
+                    }
+                });
             },
-            tooltip: {},
-            legend: {
-                data:['会员数量']
-            },
-            xAxis: {
-                data: ["2018.01","2018.02","2018.03","2018.04"]
-            },
-            yAxis: {
-                type:'value'
-            },
-            series: [{
-                name: '会员数量',
-                type: 'line',
-                data: [13,14,28,30]
-            }]
-        };
-        myChart1.setOption(memberOption);
-
-        axios.get("http://localhost:9002/report/getMemberReport.do").then((res)=>{
-            if (res.data.flag){
-                //myChart1.setOption();
-                memberOption.xAxis.data = res.data.data.months;
-                memberOption.series[0].data = res.data.data.memberCount;
-                myChart1.clear();
-                myChart1.setOption(memberOption);
+            //格式化日期
+            formatDate:function(date) {
+                var date = new Date(date);
+                var year = (date.getFullYear()).toString();
+                var month = (date.getMonth() +1).toString();
+                var day = (date.getDate()).toString();
+                if(month.length == 1) {
+                    month = '0' + month;
+                }
+                if(day.length == 1) {
+                    day = '0' + day;
+                }
+                var resultDate = year + '-'+month+ '-' + day;
+                return resultDate;
             }
-        });
-    </script>
+        }
+    })
+</script>
 </html>
