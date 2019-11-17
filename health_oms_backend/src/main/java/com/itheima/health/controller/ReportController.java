@@ -54,26 +54,26 @@ public class ReportController {
             List<Integer> memberCount = null;
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                //设置起始日期为当月1日
                 Calendar startCalendar = Calendar.getInstance();
                 startCalendar.setTime(sdf.parse(dateRange[0]));
                 startCalendar.set(startCalendar.get(Calendar.YEAR),startCalendar.get(Calendar.MONTH),1);
-                System.out.println();
+                //设置终止日期为当月2日
                 Calendar endCalendar = Calendar.getInstance();
                 endCalendar.setTime(sdf.parse(dateRange[1]));
                 endCalendar.set(endCalendar.get(Calendar.YEAR),endCalendar.get(Calendar.MONTH),2);
-
+                //循环格式化并添加日期到months参数
                 Calendar crr = startCalendar;
                 while (crr.before(endCalendar)) {
                     months.add(new SimpleDateFormat("yyyy-MM").format(crr.getTime()));
-                    System.out.println(new SimpleDateFormat("yyyy-MM").format(crr.getTime()));
                     crr.add(Calendar.MONTH,1);
                 }
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
-
+            //调用Service层返回各月的会员数量
             memberCount = memberService.countByMonth(months);
-
+            //添加到map集合，回显数据
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("months", months);
             map.put("memberCount", memberCount);
