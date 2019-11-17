@@ -71,7 +71,7 @@ public class ReportController {
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
-            //调用Service层返回各月的会员数量
+            //调用Service层返回各月会员数量
             memberCount = memberService.countByMonth(months);
             //添加到map集合，回显数据
             HashMap<String, Object> map = new HashMap<String, Object>();
