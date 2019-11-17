@@ -59,7 +59,7 @@ public class SetMealServiceImpl implements SetMealService {
             setmealDao.insertSetMealAndCheckGroup(setmeal.getId(), checkgroupId);
         }
         ObjectMapper objectMapper = new ObjectMapper();
-        //存入缓存
+        //去缓存查询，删除元缓存，加入新的数据存入缓存
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.sadd(RedisConst.SETMEAL_PIC_DB_RESOURCES, setmeal.getImg());
             jedis.del(RedisConst.SETMEAL_DB_RESOURCES);
@@ -107,8 +107,6 @@ public class SetMealServiceImpl implements SetMealService {
                 }
                 return setmealList;
             } else {
-                //创建集合
-                ArrayList<Setmeal> setmeal = new ArrayList<>();
                 //如果缓存中有要的数据，直接查缓存
                 List<String> smembers = jedis.lrange(RedisConst.SETMEAL_DB_RESOURCES,0,-1);
                 for (String smember : smembers) {
