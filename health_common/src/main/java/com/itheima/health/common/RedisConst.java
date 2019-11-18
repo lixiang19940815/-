@@ -13,4 +13,5 @@ public class RedisConst {
     //验证码前缀
     public static final String VALIDATE_CODE_PREFIX = "validateCode:";
 
+    public static final String SETMEAL_DB_RESOURCES = "setmealDbResources";
 }

@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -46,32 +47,40 @@ public class ReportController {
      *
      * @return
      */
-    @RequestMapping("/getMemberReport")
-    public Result getMemberReport() {
-
+    @GetMapping("/getMemberReport")
+    public Result getMemberReport(String[] dateRange) {
         try {
-            List<String> months = new ArrayList<>();
-            List<Integer> memeberCount = null;
-            //构造months
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.MONTH, -12);
-            DateFormat df = new SimpleDateFormat("yyyy.MM");
-            for (int i = 0; i < 12; i++) {
-                cal.add(Calendar.MONTH, 1);
-                months.add(df.format(cal.getTime()));
+            List<String> months = new ArrayList<String>();
+            List<Integer> memberCount = null;
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                //设置起始日期为当月1日
+                Calendar startCalendar = Calendar.getInstance();
+                startCalendar.setTime(sdf.parse(dateRange[0]));
+                startCalendar.set(startCalendar.get(Calendar.YEAR),startCalendar.get(Calendar.MONTH),1);
+                //设置终止日期为当月2日
+                Calendar endCalendar = Calendar.getInstance();
+                endCalendar.setTime(sdf.parse(dateRange[1]));
+                endCalendar.set(endCalendar.get(Calendar.YEAR),endCalendar.get(Calendar.MONTH),2);
+                //循环格式化并添加日期到months参数
+                Calendar crr = startCalendar;
+                while (crr.before(endCalendar)) {
+                    months.add(new SimpleDateFormat("yyyy-MM").format(crr.getTime()));
+                    crr.add(Calendar.MONTH,1);
+                }
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
             }
-
-            //构造memberCount
-            memeberCount = memberService.countByMonth(months);
-
-            Map<String, Object> map = new HashMap<>();
+            //调用Service层返回各月会员数量
+            memberCount = memberService.countByMonth(months);
+            //添加到map集合，回显数据
+            HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("months", months);
-            map.put("memberCount", memeberCount);
+            map.put("memberCount", memberCount);
             return new Result(true, MessageConst.GET_MEMBER_NUMBER_REPORT_SUCCESS, map);
         } catch (RuntimeException e) {
             log.error("", e);
             return new Result(false, MessageConst.GET_MEMBER_NUMBER_REPORT_FAIL);
-
         }
     }
 
