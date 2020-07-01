@@ -47,7 +47,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <lombok.version>1.18.8</lombok.version>
         <qiniu-java-sdk.version>7.2.25</qiniu-java-sdk.version>
-        <quartz.version>2.2.1</quartz.version>
+        <quartz.version>2.3.2</quartz.version>
         <quartz-jobs.version>2.2.1</quartz-jobs.version>
         <poi.version>3.14</poi.version>
         <aliyun-java-sdk-core.version>4.1.0</aliyun-java-sdk-core.version>
