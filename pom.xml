@@ -49,7 +49,7 @@
         <qiniu-java-sdk.version>7.2.25</qiniu-java-sdk.version>
         <quartz.version>2.2.1</quartz.version>
         <quartz-jobs.version>2.2.1</quartz-jobs.version>
-        <poi.version>3.14</poi.version>
+        <poi.version>4.1.2</poi.version>
         <aliyun-java-sdk-core.version>4.1.0</aliyun-java-sdk-core.version>
         <spring-aspects.version>5.0.5.RELEASE</spring-aspects.version>
         <jackson-databind.version>2.9.10.1</jackson-databind.version>
